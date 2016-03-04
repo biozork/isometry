@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Infinite sidescrolling Isometric swamp</title>
+	<meta charset="UTF-8" />
+	<script language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-beta1/jquery.min.js"></script>
+	<style>
+		html, body {
+			width:  100%;
+			height: 100%;
+			margin: 0px;
+		}
+	</style>
+	<script>
+		window.requestAnimFrame = (function(){
+			return  window.requestAnimationFrame   ||
+					window.webkitRequestAnimationFrame ||
+					window.mozRequestAnimationFrame    ||
+					window.oRequestAnimationFrame      ||
+					window.msRequestAnimationFrame     ||
+					function(/* function */ callback, /* DOMElement */ element){
+						window.setTimeout(callback, 1000 / 60);
+					};
+		})();
+		
+		
+		var tiles = [
+				{ src: "/swamp/000.png"	},
+				{ src: "/swamp/000.png"	},
+				{ src: "/swamp/000.png"	},
+				{ src: "/swamp/000.png"	},
+				{ src: "/swamp/000.png"	},
+				{ src: "/swamp/000.png"	},
+				{ src: "/swamp/000.png"	},
+				{ src: "/swamp/000.png"	},
+				{ src: "/swamp/000.png"	},
+				{ src: "/swamp/000.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/001.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/002.png"	},
+				{ src: "/swamp/003.png"	},
+				{ src: "/swamp/004.png"	},
+				{ src: "/swamp/005.png"	},
+				{ src: "/swamp/006.png"	},
+				{ src: "/swamp/007.png"	},
+				{ src: "/swamp/008.png"	},
+				{ src: "/swamp/009.png"	},
+				{ src: "/swamp/010.png"	},
+				{ src: "/swamp/011.png"	},
+				{ src: "/swamp/012.png"	}
+			];
+		var images = [];
+		
+		$(document).ready(function(){
+			
+			  
+			
+		// preload all tile images
+			
+			var imagesLoaded = 1;
+			for(var i = 0; i < tiles.length; i++){
+				var img = new Image();
+				img.src = 'tiles/' + tiles[i].src;
+				img.onload = function(){
+					if(imagesLoaded < tiles.length){
+						console.log('images loaded: ' + imagesLoaded + '/' + tiles.length)
+						imagesLoaded++;
+					} else if(imagesLoaded == tiles.length) {
+						console.log('all images loaded');
+						setTimeout(function(){loop();},100);
+					}
+					
+				}
+				images.push(img);
+			}
+
+		
+		
+
+		
+
+		});
+		
+		function randomMap(x,y,types){
+			var map = [];
+			for(var a = 0; a < x; a++){
+				var row = [];
+				for(var b = 0; b < y; b++){
+					row.push(Math.floor(Math.random() * types));
+				}
+				map.push(row);
+			}
+			return map;
+		}
+		
+		
+		var offset = 1;
+		
+		var map = randomMap(20,20,tiles.length);
+
+			
+		var tilecount = 0;
+		function loop(){
+			
+			
+			var canvas = document.getElementById('main')
+			var ctx = canvas.getContext('2d');	
+			ctx.clearRect(0,0, canvas.width, canvas.height);
+			//console.log(offset);
+			for (var i = 0; i < map.length; i++) {
+				for (var j = map[i].length - 1; j >= 0 ; j--) {
+					
+					var tileWidth = 76,
+						tileHeight = 43;
+
+					var tileHeightDif = tileHeight - images[map[i][j]].height;
+					ctx.drawImage(
+						images[map[i][j]],
+						((j * tileWidth) / 2) + ((i * tileWidth) / 2) +200, //X
+						(i * tileHeight / 2) - (j * tileHeight / 2) + ((map[i].length/2)*tileHeight) + tileHeightDif +70, //Y
+						tileWidth+2, 
+						images[map[i][j]].height+2
+					)
+				}
+			}
+			
+			
+			
+			ctx.translate(-offset,0);
+			tilecount++;
+			
+			if(tilecount == 75){
+				for(var a = 0; a < map.length; a++){
+					map[a].shift();
+					map[a].push(Math.floor(Math.random() * tiles.length));
+
+				}
+				var row = [];
+				for(var b = 0; b < map[0].length; b++){
+					row.push(Math.floor(Math.random() * tiles.length));
+					
+				}
+				map.shift();
+				map.push(row);
+				tilecount = 0;
+				ctx.translate(75,0);
+
+			}
+
+			$('#map').val(JSON.stringify(map));
+			requestAnimFrame(loop);
+			
+			
+			
+		}
+		
+		
+		</script>
+		</head>
+	<body>
+		<canvas id="main" width="1900" height="980"></canvas><br>
+		Map data:<br>
+		<textarea id="map" style="width:500px; height:350px;"></textarea>
+	</body>
+</html>
